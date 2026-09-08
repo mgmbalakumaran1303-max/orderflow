@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -8,10 +10,21 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { useUiStore } from "@/stores/uiStore";
 import { cn } from "@/utils/format";
 
-const sections = ["General", "Notifications", "Orders", "Printer", "Users & Roles", "Security", "Appearance"] as const;
-type Section = (typeof sections)[number];
+const sections = [
+  { id: "General", labelKey: "settings.general" },
+  { id: "Personalization", labelKey: "settings.personalization" },
+  { id: "Notifications", labelKey: "settings.notifications" },
+  { id: "Orders", labelKey: "settings.orders" },
+  { id: "Printer", labelKey: "settings.printer" },
+  { id: "Users & Roles", labelKey: "settings.usersRoles" },
+  { id: "Security", labelKey: "settings.security" },
+  { id: "Appearance", labelKey: "settings.appearance" },
+] as const;
+type Section = (typeof sections)[number]["id"];
 
 export function SettingsPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const settings = useSettingsStore();
   const toast = useUiStore((s) => s.toast);
   const [section, setSection] = useState<Section>("General");
@@ -21,15 +34,15 @@ export function SettingsPage() {
   return (
     <div>
       <PageHeader
-        title="Settings"
+        title={t("settings.title")}
         actions={
           <Button
             onClick={() => {
               settings.save();
-              toast("success", "Settings saved");
+              toast("success", t("settings.saved"));
             }}
           >
-            Save settings
+            {t("settings.save")}
           </Button>
         }
       />
@@ -37,12 +50,18 @@ export function SettingsPage() {
         <Card padding={false}>
           {sections.map((item) => (
             <button
-              key={item}
+              key={item.id}
               type="button"
-              onClick={() => setSection(item)}
-              className={cn("w-full px-4 py-2.5 text-left text-sm", section === item ? "bg-primary-muted text-primary" : "hover:bg-card-hover")}
+              onClick={() => {
+                if (item.id === "Personalization") {
+                  navigate("/settings/personalization");
+                  return;
+                }
+                setSection(item.id);
+              }}
+              className={cn("w-full px-4 py-2.5 text-left text-sm", section === item.id ? "bg-primary-muted text-primary" : "hover:bg-card-hover")}
             >
-              {item}
+              {t(item.labelKey)}
             </button>
           ))}
         </Card>
@@ -50,7 +69,7 @@ export function SettingsPage() {
           {section === "General" && (
             <>
               <p className="text-sm text-muted">Workspace defaults for ORDERFLOW.</p>
-              <Button variant="danger" onClick={() => setResetOpen(true)}>Reset Settings</Button>
+              <Button variant="danger" onClick={() => setResetOpen(true)}>{t("settings.reset")}</Button>
             </>
           )}
           {section === "Notifications" && (
@@ -95,8 +114,8 @@ export function SettingsPage() {
           {section === "Security" && <p className="text-sm text-muted">Sessions persist in localStorage for this prototype. Use Logout from the profile menu.</p>}
           {section === "Appearance" && (
             <div className="flex gap-2">
-              <Button variant={settings.theme === "dark" ? "primary" : "secondary"} onClick={() => settings.setTheme("dark")}>Dark Mode</Button>
-              <Button variant={settings.theme === "light" ? "primary" : "secondary"} onClick={() => settings.setTheme("light")}>Light Mode</Button>
+              <Button variant={settings.theme === "dark" ? "primary" : "secondary"} onClick={() => settings.setTheme("dark")}>{t("personalization.dark")}</Button>
+              <Button variant={settings.theme === "light" ? "primary" : "secondary"} onClick={() => settings.setTheme("light")}>{t("personalization.light")}</Button>
             </div>
           )}
         </Card>
@@ -114,7 +133,7 @@ export function SettingsPage() {
       />
       <ConfirmModal
         open={resetOpen}
-        title="Reset Settings?"
+        title={t("settings.reset")}
         description="All portal preferences will return to defaults."
         confirmLabel="Reset Settings"
         variant="danger"

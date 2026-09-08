@@ -19,10 +19,12 @@ import { useUiStore } from "@/stores/uiStore";
 import { STORAGE_KEYS, readJson, writeJson } from "@/utils/storage";
 import { formatEuro, formatRelative, itemCountLabel, sleep } from "@/utils/format";
 import type { ExportFormat, OrderSource, OrderStatus } from "@/types";
+import { useTranslation } from "react-i18next";
 
 type Tab = OrderStatus | "all";
 
-export function OrdersPage() {
+export function OrdersPage({ initialTab }: { initialTab?: Tab }) {
+  const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const selectedId = useRestaurantStore((s) => s.selectedId);
   const loading = useOrderStore((s) => s.loading);
@@ -44,7 +46,7 @@ export function OrdersPage() {
   const toast = useUiStore((s) => s.toast);
   const persisted = readJson<{ query: string; tab: Tab }>(STORAGE_KEYS.filters, { query: "", tab: "all" });
   const [query, setQuery] = useState(persisted.query);
-  const [tab, setTab] = useState<Tab>(persisted.tab);
+  const [tab, setTab] = useState<Tab>(initialTab ?? persisted.tab);
   const [filterOpen, setFilterOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [source, setSource] = useState<OrderSource | "all">("all");
@@ -83,21 +85,21 @@ export function OrdersPage() {
   async function exportOrders() {
     await sleep(500);
     setExportOpen(false);
-    toast("success", "Orders exported successfully.");
+    toast("success", t("orders.exported"));
   }
 
   return (
     <div>
       <PageHeader
-        title="Orders"
+        title={t("orders.title")}
         actions={
           <>
-            <SearchInput placeholder="Search orders..." value={query} onChange={(e) => setQuery(e.target.value)} wrapperClassName="w-56" />
+            <SearchInput placeholder={t("orders.search")} value={query} onChange={(e) => setQuery(e.target.value)} wrapperClassName="w-56" />
             <Button variant="secondary" onClick={() => setFilterOpen(true)}>
-              <Filter className="h-4 w-4" /> Filters
+              <Filter className="h-4 w-4" /> {t("common.filters")}
             </Button>
             <Button variant="secondary" onClick={() => setExportOpen(true)}>
-              <Download className="h-4 w-4" /> Export
+              <Download className="h-4 w-4" /> {t("common.export")}
             </Button>
           </>
         }
@@ -106,12 +108,12 @@ export function OrdersPage() {
         value={tab}
         onChange={setTab}
         tabs={[
-          { id: "all", label: "All", count: counts.all },
-          { id: "new", label: "New", count: counts.new },
-          { id: "preparing", label: "Preparing", count: counts.preparing },
-          { id: "ready", label: "Ready", count: counts.ready },
-          { id: "completed", label: "Completed", count: counts.completed },
-          { id: "cancelled", label: "Cancelled", count: counts.cancelled },
+          { id: "all", label: t("common.all"), count: counts.all },
+          { id: "new", label: t("orders.statusNew"), count: counts.new },
+          { id: "preparing", label: t("orders.statusPreparing"), count: counts.preparing },
+          { id: "ready", label: t("orders.statusReady"), count: counts.ready },
+          { id: "completed", label: t("orders.statusCompleted"), count: counts.completed },
+          { id: "cancelled", label: t("orders.statusCancelled"), count: counts.cancelled },
         ]}
       />
       <Card className="mt-4" padding={false}>
@@ -120,12 +122,12 @@ export function OrdersPage() {
             <TableSkeleton />
           </div>
         ) : error ? (
-          <ErrorState title="Unable to load orders." description="Something went wrong while loading the data." onRetry={() => void load(selectedId)} />
+          <ErrorState title={t("orders.unableToLoad")} description={t("orders.loadError")} onRetry={() => void load(selectedId)} />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={<Search className="h-8 w-8" />}
-            title={query ? "No results found" : "No orders found"}
-            description="Try adjusting search or filters to see incoming tickets."
+            title={query ? t("orders.noResults") : t("orders.noOrders")}
+            description={t("orders.emptyHint")}
           />
         ) : (
           <>
@@ -133,7 +135,7 @@ export function OrdersPage() {
               <table className="w-full text-sm">
                 <thead className="text-left text-xs text-muted">
                   <tr className="border-b border-border">
-                    {["Order", "Source", "Items", "Total", "Status", "Time", "Actions"].map((h) => (
+                    {[t("orders.order"), t("orders.source"), t("orders.items"), t("orders.total"), t("orders.status"), t("orders.time"), t("orders.actions")].map((h) => (
                       <th key={h} className="px-4 py-3 font-medium">{h}</th>
                     ))}
                   </tr>
@@ -149,7 +151,7 @@ export function OrdersPage() {
                       <td className="px-4 py-3 text-muted">{formatRelative(order.createdAt)}</td>
                       <td className="px-4 py-3">
                         <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); openOrder(order.number); }}>
-                          View
+                          {t("common.view")}
                         </Button>
                       </td>
                     </tr>
@@ -214,9 +216,9 @@ export function OrdersPage() {
               setMaxAmount("");
             }}
           >
-            Clear
+            {t("common.clear")}
           </Button>
-          <Button onClick={() => setFilterOpen(false)}>Apply Filters</Button>
+          <Button onClick={() => setFilterOpen(false)}>{t("common.apply")}</Button>
         </div>
       </Modal>
 
@@ -233,11 +235,19 @@ export function OrdersPage() {
         </FormField>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="secondary" onClick={() => setExportOpen(false)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
-          <Button onClick={() => void exportOrders()}>Export</Button>
+          <Button onClick={() => void exportOrders()}>{t("common.export")}</Button>
         </div>
       </Modal>
     </div>
   );
+}
+
+export function PreparingOrdersPage() {
+  return <OrdersPage initialTab="preparing" />;
+}
+
+export function ReadyOrdersPage() {
+  return <OrdersPage initialTab="ready" />;
 }

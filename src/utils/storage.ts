@@ -2,6 +2,8 @@ export const STORAGE_KEYS = {
   auth: "orderflow.auth",
   restaurant: "orderflow.restaurant",
   settings: "orderflow.settings",
+  theme: "orderflow_theme",
+  language: "orderflow_language",
   filters: "orderflow.orderFilters",
 } as const;
 

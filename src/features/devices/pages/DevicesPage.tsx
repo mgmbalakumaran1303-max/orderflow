@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Tablet } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -15,6 +16,7 @@ import { formatRelative } from "@/utils/format";
 import type { Device } from "@/types";
 
 export function DevicesPage() {
+  const { t } = useTranslation();
   const toast = useUiStore((s) => s.toast);
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,12 +40,12 @@ export function DevicesPage() {
 
   return (
     <div>
-      <PageHeader title="Devices" />
+      <PageHeader title={t("devices.title")} />
       <Card padding={false}>
         {loading ? (
           <div className="p-4"><TableSkeleton /></div>
         ) : devices.length === 0 ? (
-          <EmptyState icon={<Tablet className="h-8 w-8" />} title="No devices" description="Register an order pad or kitchen display." />
+          <EmptyState icon={<Tablet className="h-8 w-8" />} title={t("devices.noDevices")} description="" />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

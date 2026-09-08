@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Bell, ChevronDown, LogOut, Menu, Search, Store, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/IconButton";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { LanguageSelect } from "@/components/layout/LanguageSelect";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { searchRepository } from "@/services/api/searchRepository";
 import { notificationRepository } from "@/services/api/searchRepository";
 import { useAuthStore } from "@/stores/authStore";
@@ -12,6 +15,7 @@ import type { AppNotification } from "@/types";
 import type { SearchResults } from "@/services/api/searchRepository";
 
 export function Header() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const restaurants = useRestaurantStore((s) => s.restaurants);
@@ -85,7 +89,7 @@ export function Header() {
                 onClick={() => {
                   selectRestaurant(restaurant.id);
                   setRestOpen(false);
-                  toast("info", `Switched to ${restaurant.name}`);
+                  toast("info", t("header.switched", { name: restaurant.name }));
                 }}
               >
                 {restaurant.name}
@@ -98,7 +102,7 @@ export function Header() {
       <div className="relative hidden flex-1 md:block">
         <SearchInput
           ref={searchRef}
-          placeholder="Search anything..."
+          placeholder={t("header.search")}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
@@ -137,13 +141,15 @@ export function Header() {
               );
             })}
             {!results.orders.length && !results.customers.length && !results.menu.length && !results.users.length && !results.devices.length ? (
-              <p className="px-2 py-4 text-center text-sm text-muted">No search results</p>
+              <p className="px-2 py-4 text-center text-sm text-muted">{t("header.noSearch")}</p>
             ) : null}
           </div>
         ) : null}
       </div>
 
       <div className="ml-auto flex items-center gap-1">
+        <LanguageSelect />
+        <ThemeToggle />
         <div className="relative md:hidden">
           <IconButton label="Search" onClick={() => searchRef.current?.focus()}>
             <Search className="h-4 w-4" />
@@ -159,7 +165,7 @@ export function Header() {
           {notesOpen ? (
             <div className="absolute right-0 top-11 w-80 rounded-xl border border-border bg-card p-2 shadow-card">
               {notes.length === 0 ? (
-                <p className="py-6 text-center text-sm text-muted">No notifications</p>
+                <p className="py-6 text-center text-sm text-muted">{t("notifications.empty")}</p>
               ) : (
                 notes.map((note) => (
                   <button
@@ -196,16 +202,19 @@ export function Header() {
           {profileOpen ? (
             <div className="absolute right-0 top-12 w-56 rounded-xl border border-border bg-card p-1 shadow-card">
               <button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-card-hover" onClick={() => { setProfileOpen(false); navigate("/settings"); }}>
-                <UserRound className="h-4 w-4" /> Profile
+                <UserRound className="h-4 w-4" /> {t("header.profile")}
+              </button>
+              <button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-card-hover" onClick={() => { setProfileOpen(false); navigate("/settings/personalization"); }}>
+                {t("navigation.personalization")}
               </button>
               <button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-card-hover" onClick={() => { setProfileOpen(false); navigate("/settings"); }}>
-                Account Settings
+                {t("header.account")}
               </button>
               <button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-card-hover" onClick={() => { setProfileOpen(false); setRestOpen(true); }}>
-                Switch Restaurant
+                {t("header.switchRestaurant")}
               </button>
               <button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-card-hover" onClick={() => { setProfileOpen(false); setHelp(true); }}>
-                Help Center
+                {t("header.help")}
               </button>
               <button
                 type="button"
@@ -213,9 +222,10 @@ export function Header() {
                 onClick={() => {
                   setProfileOpen(false);
                   openConfirm({
-                    title: "Logout",
-                    description: "Are you sure you want to sign out of ORDERFLOW?",
-                    confirmLabel: "Logout",
+                    title: t("dialogs.logoutTitle"),
+                    description: t("dialogs.logoutBody"),
+                    confirmLabel: t("auth.logout"),
+                    cancelLabel: t("common.cancel"),
                     variant: "danger",
                     onConfirm: () => {
                       logout();
@@ -224,7 +234,7 @@ export function Header() {
                   });
                 }}
               >
-                <LogOut className="h-4 w-4" /> Logout
+                <LogOut className="h-4 w-4" /> {t("auth.logout")}
               </button>
             </div>
           ) : null}

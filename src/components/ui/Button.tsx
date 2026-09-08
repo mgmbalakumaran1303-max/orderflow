@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/utils/format";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger" | "success" | "outline";
@@ -35,6 +36,7 @@ export function Button({
   disabled,
   ...props
 }: Props) {
+  const { t } = useTranslation();
   return (
     <button
       className={cn(
@@ -46,7 +48,7 @@ export function Button({
       disabled={disabled || loading}
       {...props}
     >
-      {loading ? "Please wait..." : children}
+      {loading ? t("common.loading") : children}
     </button>
   );
 }

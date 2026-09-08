@@ -1,9 +1,21 @@
 import { create } from "zustand";
-import type { AppSettings, ThemeMode } from "@/types";
+import type { AppLanguage, AppSettings, ThemeMode } from "@/types";
 import { STORAGE_KEYS, readJson, writeJson } from "@/utils/storage";
+import i18n, { persistLanguage, readSavedLanguage } from "@/i18n";
+
+const THEME_KEY = "orderflow_theme";
+
+function readTheme(): ThemeMode {
+  const standalone = localStorage.getItem(THEME_KEY);
+  if (standalone === "light" || standalone === "dark") return standalone;
+  const nested = readJson<Partial<AppSettings>>(STORAGE_KEYS.settings, {});
+  if (nested.theme === "light" || nested.theme === "dark") return nested.theme;
+  return "light";
+}
 
 const defaults: AppSettings = {
-  theme: "dark",
+  theme: "light",
+  language: "en",
   notifications: {
     newOrder: true,
     sound: true,
@@ -27,9 +39,16 @@ const defaults: AppSettings = {
   },
 };
 
+function persistAll(settings: AppSettings): void {
+  writeJson(STORAGE_KEYS.settings, settings);
+  localStorage.setItem(THEME_KEY, settings.theme);
+  persistLanguage(settings.language);
+}
+
 interface SettingsState extends AppSettings {
   dirty: boolean;
   setTheme: (theme: ThemeMode) => void;
+  setLanguage: (language: AppLanguage) => Promise<void>;
   patch: (value: Partial<AppSettings>) => void;
   save: () => void;
   reset: () => void;
@@ -37,39 +56,60 @@ interface SettingsState extends AppSettings {
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => {
-  const persisted = readJson<AppSettings>(STORAGE_KEYS.settings, defaults);
+  const persisted = readJson<Partial<AppSettings>>(STORAGE_KEYS.settings, {});
+  const theme = readTheme();
+  const language = persisted.language ?? readSavedLanguage();
+  const initial: AppSettings = { ...defaults, ...persisted, theme, language };
   return {
-    ...defaults,
-    ...persisted,
+    ...initial,
     dirty: false,
     applyTheme: () => {
       document.documentElement.dataset.theme = get().theme;
+      document.documentElement.lang = get().language;
     },
     setTheme: (theme) => {
       document.documentElement.dataset.theme = theme;
-      const next = { ...get(), theme, dirty: true };
-      set({ theme, dirty: true });
-      writeJson(STORAGE_KEYS.settings, {
-        theme: next.theme,
+      const next = { ...get(), theme };
+      persistAll({
+        theme,
+        language: next.language,
         notifications: next.notifications,
         orders: next.orders,
         printer: next.printer,
       });
+      set({ theme, dirty: false });
+    },
+    setLanguage: async (language) => {
+      await i18n.changeLanguage(language);
+      document.documentElement.lang = language;
+      const next = { ...get(), language };
+      persistAll({
+        theme: next.theme,
+        language,
+        notifications: next.notifications,
+        orders: next.orders,
+        printer: next.printer,
+      });
+      set({ language, dirty: false });
     },
     patch: (value) => set({ ...value, dirty: true }),
     save: () => {
-      const { theme, notifications, orders, printer } = get();
-      writeJson(STORAGE_KEYS.settings, { theme, notifications, orders, printer });
+      const { theme, language, notifications, orders, printer } = get();
+      persistAll({ theme, language, notifications, orders, printer });
       set({ dirty: false });
     },
     reset: () => {
-      writeJson(STORAGE_KEYS.settings, defaults);
+      persistAll(defaults);
       document.documentElement.dataset.theme = defaults.theme;
+      document.documentElement.lang = defaults.language;
+      void i18n.changeLanguage(defaults.language);
       set({ ...defaults, dirty: false });
     },
   };
 });
 
 if (typeof document !== "undefined") {
-  document.documentElement.dataset.theme = useSettingsStore.getState().theme;
+  const state = useSettingsStore.getState();
+  document.documentElement.dataset.theme = state.theme;
+  document.documentElement.lang = state.language;
 }

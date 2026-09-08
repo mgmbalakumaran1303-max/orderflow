@@ -3,10 +3,13 @@ import { Navigate, createHashRouter } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
+import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 
 const DashboardPage = lazy(() => import("@/features/dashboard/pages/DashboardPage").then((m) => ({ default: m.DashboardPage })));
 const OrdersPage = lazy(() => import("@/features/orders/pages/OrdersPage").then((m) => ({ default: m.OrdersPage })));
+const PreparingOrdersPage = lazy(() => import("@/features/orders/pages/OrdersPage").then((m) => ({ default: m.PreparingOrdersPage })));
+const ReadyOrdersPage = lazy(() => import("@/features/orders/pages/OrdersPage").then((m) => ({ default: m.ReadyOrdersPage })));
 const OrderRoutePage = lazy(() => import("@/features/orders/pages/OrderRoutePage").then((m) => ({ default: m.OrderRoutePage })));
 const MenuPage = lazy(() => import("@/features/menu/pages/MenuPage").then((m) => ({ default: m.MenuPage })));
 const RestaurantPage = lazy(() => import("@/features/restaurant/pages/RestaurantPage").then((m) => ({ default: m.RestaurantPage })));
@@ -17,6 +20,10 @@ const UsersPage = lazy(() => import("@/features/users/pages/UsersPage").then((m)
 const DevicesPage = lazy(() => import("@/features/devices/pages/DevicesPage").then((m) => ({ default: m.DevicesPage })));
 const ReportsPage = lazy(() => import("@/features/reports/pages/ReportsPage").then((m) => ({ default: m.ReportsPage })));
 const SettingsPage = lazy(() => import("@/features/settings/pages/SettingsPage").then((m) => ({ default: m.SettingsPage })));
+const PersonalizationPage = lazy(() => import("@/features/settings/pages/PersonalizationPage").then((m) => ({ default: m.PersonalizationPage })));
+const NotificationsPage = lazy(() => import("@/features/notifications/pages/NotificationsPage").then((m) => ({ default: m.NotificationsPage })));
+const NotFoundPage = lazy(() => import("@/features/errors/pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })));
+const UnauthorizedPage = lazy(() => import("@/features/errors/pages/NotFoundPage").then((m) => ({ default: m.UnauthorizedPage })));
 
 function Fallback() {
   return (
@@ -28,6 +35,7 @@ function Fallback() {
 
 export const router = createHashRouter([
   { path: "/login", element: <LoginPage /> },
+  { path: "/forgot-password", element: <ForgotPasswordPage /> },
   {
     element: <ProtectedRoute />,
     children: [
@@ -38,6 +46,8 @@ export const router = createHashRouter([
           { path: "/dashboard", element: <Suspense fallback={<Fallback />}><DashboardPage /></Suspense> },
           { path: "/orders", element: <Suspense fallback={<Fallback />}><OrdersPage /></Suspense> },
           { path: "/orders/:orderId", element: <Suspense fallback={<Fallback />}><OrderRoutePage /></Suspense> },
+          { path: "/preparing", element: <Suspense fallback={<Fallback />}><PreparingOrdersPage /></Suspense> },
+          { path: "/ready", element: <Suspense fallback={<Fallback />}><ReadyOrdersPage /></Suspense> },
           { path: "/menu", element: <Suspense fallback={<Fallback />}><MenuPage /></Suspense> },
           { path: "/restaurant", element: <Suspense fallback={<Fallback />}><RestaurantPage /></Suspense> },
           { path: "/delivery-zones", element: <Suspense fallback={<Fallback />}><DeliveryZonesPage /></Suspense> },
@@ -46,10 +56,13 @@ export const router = createHashRouter([
           { path: "/users", element: <Suspense fallback={<Fallback />}><UsersPage /></Suspense> },
           { path: "/devices", element: <Suspense fallback={<Fallback />}><DevicesPage /></Suspense> },
           { path: "/reports", element: <Suspense fallback={<Fallback />}><ReportsPage /></Suspense> },
+          { path: "/notifications", element: <Suspense fallback={<Fallback />}><NotificationsPage /></Suspense> },
           { path: "/settings", element: <Suspense fallback={<Fallback />}><SettingsPage /></Suspense> },
+          { path: "/settings/personalization", element: <Suspense fallback={<Fallback />}><PersonalizationPage /></Suspense> },
+          { path: "/unauthorized", element: <Suspense fallback={<Fallback />}><UnauthorizedPage /></Suspense> },
+          { path: "*", element: <Suspense fallback={<Fallback />}><NotFoundPage /></Suspense> },
         ],
       },
     ],
   },
-  { path: "*", element: <Navigate to="/dashboard" replace /> },
 ]);

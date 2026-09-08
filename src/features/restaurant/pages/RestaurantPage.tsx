@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -8,6 +9,7 @@ import { useUiStore } from "@/stores/uiStore";
 import { ConfirmModal } from "@/components/modals/Modal";
 
 export function RestaurantPage() {
+  const { t } = useTranslation();
   const selected = useRestaurantStore((s) => s.selected);
   const updateCurrent = useRestaurantStore((s) => s.updateCurrent);
   const toast = useUiStore((s) => s.toast);
@@ -33,7 +35,7 @@ export function RestaurantPage() {
   return (
     <div>
       <PageHeader
-        title="Restaurant"
+        title={t("navigation.restaurant")}
         description="Opening hours, contact details and tax configuration."
         actions={
           <Button

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/utils/format";
 import type { OrderStatus } from "@/types";
-import { statusLabel } from "@/utils/format";
+import { useTranslation } from "react-i18next";
 
 const statusStyles: Record<OrderStatus, string> = {
   new: "bg-primary-muted text-primary",
@@ -12,9 +12,17 @@ const statusStyles: Record<OrderStatus, string> = {
 };
 
 export function StatusBadge({ status }: { status: OrderStatus }) {
+  const { t } = useTranslation();
+  const labels: Record<OrderStatus, string> = {
+    new: t("orders.statusNew"),
+    preparing: t("orders.statusPreparing"),
+    ready: t("orders.statusReady"),
+    completed: t("orders.statusCompleted"),
+    cancelled: t("orders.statusCancelled"),
+  };
   return (
     <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", statusStyles[status])}>
-      {statusLabel(status)}
+      {labels[status]}
     </span>
   );
 }

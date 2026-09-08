@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { MapPin } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -16,6 +17,7 @@ import { formatEuro } from "@/utils/format";
 import type { DeliveryZone } from "@/types";
 
 export function DeliveryZonesPage() {
+  const { t } = useTranslation();
   const restaurantId = useRestaurantStore((s) => s.selectedId);
   const toast = useUiStore((s) => s.toast);
   const [zones, setZones] = useState<DeliveryZone[]>([]);
@@ -60,7 +62,7 @@ export function DeliveryZonesPage() {
 
   return (
     <div>
-      <PageHeader title="Delivery Zones" actions={<Button onClick={openCreate}>Add Zone</Button>} />
+      <PageHeader title={t("deliveryZones.title")} actions={<Button onClick={openCreate}>{t("deliveryZones.add")}</Button>} />
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
         <Card padding={false}>
           <div className="p-4">
@@ -69,7 +71,7 @@ export function DeliveryZonesPage() {
           {loading ? (
             <div className="p-4"><TableSkeleton rows={4} /></div>
           ) : visible.length === 0 ? (
-            <EmptyState icon={<MapPin className="h-8 w-8" />} title="No delivery zones" description="Add a postcode to start delivering." />
+            <EmptyState icon={<MapPin className="h-8 w-8" />} title={t("deliveryZones.noZones")} description="" />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

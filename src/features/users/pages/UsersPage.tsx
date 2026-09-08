@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -16,6 +17,7 @@ import type { StaffUser, UserRole, UserStatus } from "@/types";
 const empty = { name: "", email: "", role: "staff" as UserRole, status: "active" as UserStatus };
 
 export function UsersPage() {
+  const { t } = useTranslation();
   const toast = useUiStore((s) => s.toast);
   const [users, setUsers] = useState<StaffUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,12 +54,12 @@ export function UsersPage() {
 
   return (
     <div>
-      <PageHeader title="Users" actions={<Button onClick={openCreate}>Add User</Button>} />
+      <PageHeader title={t("users.title")} actions={<Button onClick={openCreate}>{t("users.add")}</Button>} />
       <Card padding={false}>
         {loading ? (
           <div className="p-4"><TableSkeleton /></div>
         ) : users.length === 0 ? (
-          <EmptyState icon={<Users className="h-8 w-8" />} title="No users" description="Invite kitchen or front-of-house staff." />
+          <EmptyState icon={<Users className="h-8 w-8" />} title={t("users.noUsers")} description="" />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -16,6 +17,7 @@ import type { MenuCategory, MenuItem } from "@/types";
 type Tab = "categories" | "items" | "variants" | "addons";
 
 export function MenuPage() {
+  const { t } = useTranslation();
   const toast = useUiStore((s) => s.toast);
   const [tab, setTab] = useState<Tab>("items");
   const [categories, setCategories] = useState<MenuCategory[]>([]);
@@ -55,7 +57,7 @@ export function MenuPage() {
   return (
     <div>
       <PageHeader
-        title="Menu Management"
+        title={t("menu.title")}
         actions={
           <>
             <Button variant="secondary" onClick={() => setCategoryOpen(true)}>Add Category</Button>

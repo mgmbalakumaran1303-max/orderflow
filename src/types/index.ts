@@ -5,6 +5,7 @@ export type UserStatus = "active" | "inactive";
 export type DeviceStatus = "connected" | "disconnected";
 export type ChannelId = "uber-eats" | "whatsapp" | "website" | "wolt";
 export type ThemeMode = "dark" | "light";
+export type AppLanguage = "en" | "de" | "es" | "fr" | "it";
 export type ExportFormat = "csv" | "excel" | "pdf";
 
 export interface Restaurant {
@@ -159,6 +160,7 @@ export interface CapacityState {
 
 export interface AppSettings {
   theme: ThemeMode;
+  language: AppLanguage;
   notifications: {
     newOrder: boolean;
     sound: boolean;

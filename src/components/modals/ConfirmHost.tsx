@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ConfirmModal } from "@/components/modals/Modal";
 import { useUiStore } from "@/stores/uiStore";
 
 export function ConfirmHost() {
+  const { t } = useTranslation();
   const confirm = useUiStore((s) => s.confirm);
   const close = useUiStore((s) => s.closeConfirm);
   const unsaved = useUiStore((s) => s.unsavedPrompt);
@@ -34,10 +36,10 @@ export function ConfirmHost() {
       />
       <ConfirmModal
         open={Boolean(unsaved)}
-        title="Unsaved Changes"
-        description="You have unsaved changes. Are you sure you want to leave?"
-        confirmLabel="Discard Changes"
-        cancelLabel="Stay"
+        title={t("dialogs.unsavedTitle")}
+        description={t("dialogs.unsavedBody")}
+        confirmLabel={t("common.discard")}
+        cancelLabel={t("common.stay")}
         variant="danger"
         onCancel={() => {
           unsaved?.onStay();

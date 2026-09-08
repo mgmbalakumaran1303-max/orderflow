@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -17,6 +18,7 @@ import type { ExportFormat } from "@/types";
 import { subDays } from "date-fns";
 
 export function ReportsPage() {
+  const { t } = useTranslation();
   const restaurantId = useRestaurantStore((s) => s.selectedId);
   const toast = useUiStore((s) => s.toast);
   const [from, setFrom] = useState(() => subDays(new Date(), 7));
@@ -37,7 +39,7 @@ export function ReportsPage() {
   return (
     <div>
       <PageHeader
-        title="Reports"
+        title={t("reports.title")}
         actions={
           <>
             <input className="h-9 rounded-lg border border-border bg-card px-2 text-sm" type="date" value={from.toISOString().slice(0, 10)} onChange={(e) => setFrom(new Date(e.target.value))} />
@@ -54,7 +56,7 @@ export function ReportsPage() {
           <ChartSkeleton />
         </div>
       ) : data.totalOrders === 0 ? (
-        <EmptyState icon={<BarChart3 className="h-8 w-8" />} title="No reports" description="No orders in this date range." />
+        <EmptyState icon={<BarChart3 className="h-8 w-8" />} title={t("reports.noReports")} description="" />
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -73,7 +75,7 @@ export function ReportsPage() {
                     <XAxis dataKey="date" stroke="var(--muted)" fontSize={12} />
                     <YAxis stroke="var(--muted)" fontSize={12} allowDecimals={false} />
                     <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)" }} />
-                    <Line type="monotone" dataKey="orders" stroke="#f97316" strokeWidth={2} />
+                    <Line type="monotone" dataKey="orders" stroke="#1976D2" strokeWidth={2} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -101,7 +103,7 @@ export function ReportsPage() {
                     <XAxis dataKey="name" stroke="var(--muted)" fontSize={12} />
                     <YAxis stroke="var(--muted)" fontSize={12} allowDecimals={false} />
                     <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)" }} />
-                    <Bar dataKey="count" fill="#f97316" radius={6} />
+                    <Bar dataKey="count" fill="#1976D2" radius={6} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

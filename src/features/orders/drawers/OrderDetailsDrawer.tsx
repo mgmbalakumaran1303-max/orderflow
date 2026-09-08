@@ -14,6 +14,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { useUiStore } from "@/stores/uiStore";
 import { formatEuro, formatRelative, itemCountLabel } from "@/utils/format";
 import { sleep } from "@/utils/format";
+import { useTranslation } from "react-i18next";
 import type { OrderStatus } from "@/types";
 
 const reasons = ["Item unavailable", "Restaurant busy", "Delivery issue", "Technical issue", "Other"];
@@ -25,6 +26,7 @@ export function OrderDetailsDrawer({
   orderNumber: number | null;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const orders = useOrderStore((s) => s.orders);
   const order = orderNumber ? orders.find((item) => item.number === orderNumber) : undefined;
   const transition = useOrderStore((s) => s.transition);
@@ -47,23 +49,23 @@ export function OrderDetailsDrawer({
     if (!order) return [];
     const map: Record<OrderStatus, Array<{ label: string; variant: "primary" | "danger" | "secondary"; onClick: () => void }>> = {
       new: [
-        { label: "Accept Order", variant: "primary", onClick: () => setAcceptOpen(true) },
-        { label: "Reject Order", variant: "danger", onClick: () => setRejectStep(1) },
+        { label: t("orders.accept"), variant: "primary", onClick: () => setAcceptOpen(true) },
+        { label: t("orders.reject"), variant: "danger", onClick: () => setRejectStep(1) },
       ],
       preparing: [
-        { label: "Mark as Ready", variant: "primary", onClick: () => setReadyOpen(true) },
-        { label: "Print Order", variant: "secondary", onClick: () => setPrintOpen(true) },
-        { label: "Reject Order", variant: "danger", onClick: () => setRejectStep(1) },
+        { label: t("orders.markReady"), variant: "primary", onClick: () => setReadyOpen(true) },
+        { label: t("orders.print"), variant: "secondary", onClick: () => setPrintOpen(true) },
+        { label: t("orders.reject"), variant: "danger", onClick: () => setRejectStep(1) },
       ],
       ready: [
-        { label: "Complete Order", variant: "primary", onClick: () => setCompleteOpen(true) },
-        { label: "Print Order", variant: "secondary", onClick: () => setPrintOpen(true) },
+        { label: t("orders.complete"), variant: "primary", onClick: () => setCompleteOpen(true) },
+        { label: t("orders.print"), variant: "secondary", onClick: () => setPrintOpen(true) },
       ],
-      completed: [{ label: "Print Order", variant: "secondary", onClick: () => setPrintOpen(true) }],
+      completed: [{ label: t("orders.print"), variant: "secondary", onClick: () => setPrintOpen(true) }],
       cancelled: [],
     };
     return map[order.status];
-  }, [order]);
+  }, [order, t]);
 
   async function move(status: OrderStatus, success: string, rejectReason?: string) {
     if (!order) return;
@@ -72,7 +74,7 @@ export function OrderDetailsDrawer({
       await transition(order.number, status, rejectReason);
       toast(status === "cancelled" ? "error" : "success", success);
     } catch (error) {
-      toast("error", error instanceof Error ? error.message : "Unable to update order");
+      toast("error", error instanceof Error ? error.message : t("orders.updateError"));
     } finally {
       setBusy(false);
     }
@@ -84,11 +86,11 @@ export function OrderDetailsDrawer({
     setPrinting(false);
     if (!printerAvailable) {
       setPrintFail(true);
-      toast("error", "Printer unavailable.");
+      toast("error", t("orders.printerUnavailable"));
       return;
     }
     setPrintOpen(false);
-    toast("success", "Order printed successfully.");
+    toast("success", t("orders.printed"));
   }
 
   return (
@@ -176,8 +178,8 @@ export function OrderDetailsDrawer({
 
       <ConfirmModal
         open={acceptOpen}
-        title="Accept Order?"
-        description={`Are you sure you want to accept Order #${order?.number}?`}
+        title={t("dialogs.acceptTitle")}
+        description={t("dialogs.acceptBody", { number: order?.number })}
         extra={
           order ? (
             <div className="rounded-lg border border-border bg-surface-2 p-3 text-sm">
@@ -187,49 +189,52 @@ export function OrderDetailsDrawer({
             </div>
           ) : null
         }
-        confirmLabel="Accept Order"
+        confirmLabel={t("orders.accept")}
+        cancelLabel={t("common.cancel")}
         onCancel={() => setAcceptOpen(false)}
         onConfirm={async () => {
-          await move("preparing", `Order #${order?.number} accepted successfully.`);
+          await move("preparing", t("orders.accepted", { number: order?.number }));
           setAcceptOpen(false);
         }}
       />
       <ConfirmModal
         open={readyOpen}
-        title="Mark Order as Ready?"
-        description={`Order #${order?.number} will move to Ready.`}
-        confirmLabel="Mark as Ready"
+        title={t("dialogs.readyTitle")}
+        description={t("dialogs.readyBody", { number: order?.number })}
+        confirmLabel={t("orders.markReady")}
+        cancelLabel={t("common.cancel")}
         onCancel={() => setReadyOpen(false)}
         onConfirm={async () => {
-          await move("ready", `Order #${order?.number} is ready.`);
+          await move("ready", t("orders.readyToast", { number: order?.number }));
           setReadyOpen(false);
         }}
       />
       <ConfirmModal
         open={completeOpen}
-        title="Complete Order?"
-        description="Are you sure the order has been completed?"
-        confirmLabel="Complete Order"
+        title={t("dialogs.completeTitle")}
+        description={t("dialogs.completeBody")}
+        confirmLabel={t("orders.complete")}
+        cancelLabel={t("common.cancel")}
         onCancel={() => setCompleteOpen(false)}
         onConfirm={async () => {
-          await move("completed", `Order #${order?.number} completed.`);
+          await move("completed", t("orders.completedToast", { number: order?.number }));
           setCompleteOpen(false);
         }}
       />
       <ConfirmModal
         open={printOpen && !printFail}
-        title="Print Order?"
-        description="A receipt will be sent to the configured printer."
-        confirmLabel={printing ? "Printing..." : "Print"}
+        title={t("dialogs.printTitle")}
+        description={t("dialogs.printBody")}
+        confirmLabel={printing ? t("common.loading") : t("orders.print")}
         extra={<Printer className="h-4 w-4 text-muted" />}
         onCancel={() => setPrintOpen(false)}
         onConfirm={() => void print()}
       />
       <ConfirmModal
         open={printFail}
-        title="Printer unavailable."
-        description="The kitchen printer did not respond."
-        confirmLabel="Retry"
+        title={t("orders.printerUnavailable")}
+        description={t("orders.printerUnavailable")}
+        confirmLabel={t("common.retry")}
         onCancel={() => {
           setPrintFail(false);
           setPrintOpen(false);
@@ -241,28 +246,28 @@ export function OrderDetailsDrawer({
       />
       <ConfirmModal
         open={callOpen}
-        title="Call Customer?"
+        title={t("dialogs.callTitle")}
         description={`Call ${order?.customer.name} at ${order?.customer.phone}?`}
-        confirmLabel="Call"
+        confirmLabel={t("common.confirm")}
         onCancel={() => setCallOpen(false)}
         onConfirm={() => {
-          toast("info", `Calling ${order?.customer.phone}...`);
+          toast("info", t("orders.calling", { phone: order?.customer.phone }));
           setCallOpen(false);
         }}
       />
       <ConfirmModal
         open={navOpen}
-        title="Open Navigation?"
-        description="Open maps for Unter den Linden 10, Berlin?"
-        confirmLabel="Open Navigation"
+        title={t("dialogs.navTitle")}
+        description="Unter den Linden 10, Berlin"
+        confirmLabel={t("common.confirm")}
         onCancel={() => setNavOpen(false)}
         onConfirm={() => {
-          toast("info", "Opening navigation...");
+          toast("info", t("orders.openingNav"));
           setNavOpen(false);
         }}
       />
-      <Modal open={rejectStep === 1} title="Reject Order" onClose={() => setRejectStep(0)}>
-        <FormField label="Reason">
+      <Modal open={rejectStep === 1} title={t("dialogs.rejectReason")} onClose={() => setRejectStep(0)}>
+        <FormField label={t("dialogs.reason")}>
           <Select value={reason} onChange={(e) => setReason(e.target.value)}>
             {reasons.map((item) => (
               <option key={item}>{item}</option>
@@ -271,27 +276,27 @@ export function OrderDetailsDrawer({
         </FormField>
         {reason === "Other" ? (
           <div className="mt-3">
-            <FormField label="Details">
+            <FormField label={t("dialogs.reason")}>
               <TextArea value={other} onChange={(e) => setOther(e.target.value)} />
             </FormField>
           </div>
         ) : null}
         <div className="mt-4 flex justify-end gap-2">
           <Button variant="secondary" onClick={() => setRejectStep(0)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
-          <Button onClick={() => setRejectStep(2)}>Continue</Button>
+          <Button onClick={() => setRejectStep(2)}>{t("common.continue")}</Button>
         </div>
       </Modal>
       <ConfirmModal
         open={rejectStep === 2}
-        title="Reject Order?"
-        description="This action cannot be undone."
-        confirmLabel="Reject Order"
+        title={t("dialogs.rejectTitle")}
+        description={t("dialogs.rejectBody")}
+        confirmLabel={t("orders.reject")}
         variant="danger"
         onCancel={() => setRejectStep(0)}
         onConfirm={async () => {
-          await move("cancelled", `Order #${order?.number} rejected`, reason === "Other" ? other : reason);
+          await move("cancelled", t("orders.rejected", { number: order?.number }), reason === "Other" ? other : reason);
           setRejectStep(0);
         }}
       />

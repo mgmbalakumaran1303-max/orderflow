@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -12,6 +13,7 @@ import { formatRelative } from "@/utils/format";
 import type { Channel } from "@/types";
 
 export function ChannelsPage() {
+  const { t } = useTranslation();
   const toast = useUiStore((s) => s.toast);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [active, setActive] = useState<Channel | null>(null);
@@ -27,7 +29,7 @@ export function ChannelsPage() {
 
   return (
     <div>
-      <PageHeader title="Channels" description="Connected order sources." />
+      <PageHeader title={t("channels.title")} description={t("channels.description")} />
       <div className="grid gap-4 md:grid-cols-2">
         {channels.map((channel) => (
           <Card key={channel.id} hover>

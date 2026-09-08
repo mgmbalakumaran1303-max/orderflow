@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Minus, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -13,6 +14,7 @@ import { useUiStore } from "@/stores/uiStore";
 import type { CapacityState } from "@/types";
 
 export function CapacityPage() {
+  const { t } = useTranslation();
   const restaurantId = useRestaurantStore((s) => s.selectedId);
   const orders = useOrderStore((s) => s.orders);
   const kpis = useMemo(() => {
@@ -40,7 +42,7 @@ export function CapacityPage() {
 
   return (
     <div>
-      <PageHeader title="Capacity" description="Control how many orders the kitchen can handle this hour." />
+      <PageHeader title={t("capacity.title")} description={t("capacity.description")} />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Maximum Orders" value={`${state.maxPerHour}/hr`} icon={<Plus className="h-4 w-4" />} />
         <StatCard label="Current Orders" value={current} tone="warning" icon={<Plus className="h-4 w-4" />} />

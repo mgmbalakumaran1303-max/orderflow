@@ -24,11 +24,13 @@ import { ErrorState } from "@/components/ui/Tabs";
 import { useOrderStore } from "@/stores/orderStore";
 import { useRestaurantStore } from "@/stores/restaurantStore";
 import { formatEuro, formatRelative, itemCountLabel, sourceLabel } from "@/utils/format";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 
-const COLORS = ["#f97316", "#3b82f6", "#22c55e", "#eab308", "#8ba0b3"];
+const COLORS = ["#1976D2", "#2563EB", "#16A34A", "#F59E0B", "#94A3B8"];
 
 export function DashboardPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const selectedId = useRestaurantStore((s) => s.selectedId);
   const orders = useOrderStore((s) => s.orders);
@@ -42,6 +44,7 @@ export function DashboardPage() {
       preparing: list.filter((order) => order.status === "preparing").length,
       ready: list.filter((order) => order.status === "ready").length,
       completed: list.filter((order) => order.status === "completed").length,
+      total: list.length,
     };
   }, [orders, selectedId]);
   const [date, setDate] = useState(() => new Date());
@@ -84,14 +87,14 @@ export function DashboardPage() {
   }
 
   if (error) {
-    return <ErrorState title="Unable to load dashboard" description={error} onRetry={() => void load(selectedId)} />;
+    return <ErrorState title={t("dashboard.unableToLoad")} description={error} onRetry={() => void load(selectedId)} />;
   }
 
   return (
     <div>
       <PageHeader
-        title="Dashboard"
-        description="Welcome back, Restaurant Admin 👋"
+        title={t("dashboard.title")}
+        description={t("dashboard.welcome")}
         actions={
           <label className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm">
             <span className="text-muted">Today,</span>
@@ -105,14 +108,15 @@ export function DashboardPage() {
         }
       />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="New Orders" value={kpis.new} trend="+20% vs yesterday" tone="primary" icon={<ShoppingBag className="h-4 w-4" />} />
-        <StatCard label="Preparing" value={kpis.preparing} trend="+12% vs yesterday" tone="warning" icon={<Flame className="h-4 w-4" />} />
-        <StatCard label="Ready" value={kpis.ready} trend="-5% vs yesterday" tone="success" icon={<Clock3 className="h-4 w-4" />} />
-        <StatCard label="Completed" value={kpis.completed} trend="+18% vs yesterday" tone="info" icon={<CheckCircle2 className="h-4 w-4" />} />
+        <StatCard label={t("dashboard.totalOrders")} value={kpis.total} tone="info" icon={<ShoppingBag className="h-4 w-4" />} />
+        <StatCard label={t("dashboard.newOrders")} value={kpis.new} trend={`+20% ${t("dashboard.vsYesterday")}`} tone="primary" icon={<ShoppingBag className="h-4 w-4" />} />
+        <StatCard label={t("dashboard.preparing")} value={kpis.preparing} trend={`+12% ${t("dashboard.vsYesterday")}`} tone="warning" icon={<Flame className="h-4 w-4" />} />
+        <StatCard label={t("dashboard.ready")} value={kpis.ready} trend={`-5% ${t("dashboard.vsYesterday")}`} tone="success" icon={<Clock3 className="h-4 w-4" />} />
+        <StatCard label={t("dashboard.completed")} value={kpis.completed} trend={`+18% ${t("dashboard.vsYesterday")}`} tone="info" icon={<CheckCircle2 className="h-4 w-4" />} />
       </div>
       <div className="mt-5 grid gap-4 xl:grid-cols-3">
         <Card className="xl:col-span-2">
-          <h2 className="mb-4 text-sm font-semibold">Orders Overview</h2>
+          <h2 className="mb-4 text-sm font-semibold">{t("dashboard.ordersOverview")}</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={overview}>
@@ -120,7 +124,7 @@ export function DashboardPage() {
                 <XAxis dataKey="date" stroke="var(--muted)" fontSize={12} />
                 <YAxis stroke="var(--muted)" fontSize={12} allowDecimals={false} />
                 <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12 }} />
-                <Area type="monotone" dataKey="New" stroke="#f97316" fill="#f97316" fillOpacity={0.15} />
+                <Area type="monotone" dataKey="New" stroke="#1976D2" fill="#1976D2" fillOpacity={0.15} />
                 <Area type="monotone" dataKey="Preparing" stroke="#eab308" fill="#eab308" fillOpacity={0.12} />
                 <Area type="monotone" dataKey="Completed" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.12} />
               </AreaChart>
@@ -128,7 +132,7 @@ export function DashboardPage() {
           </div>
         </Card>
         <Card>
-          <h2 className="mb-4 text-sm font-semibold">Orders by Source</h2>
+          <h2 className="mb-4 text-sm font-semibold">{t("dashboard.ordersBySource")}</h2>
           <div className="relative h-48">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -159,9 +163,9 @@ export function DashboardPage() {
       </div>
       <Card className="mt-5" padding={false}>
         <div className="flex items-center justify-between px-4 py-3">
-          <h2 className="text-sm font-semibold">Recent Orders</h2>
+          <h2 className="text-sm font-semibold">{t("dashboard.recentOrders")}</h2>
           <Button variant="ghost" size="sm" onClick={() => navigate("/orders")}>
-            View all orders
+            {t("dashboard.viewAll")}
           </Button>
         </div>
         <div className="hidden overflow-x-auto md:block">
