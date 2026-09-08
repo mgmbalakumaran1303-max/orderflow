@@ -7,6 +7,7 @@ import { defineConfig } from "vite";
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
+  base: '/orderflow-web/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -14,3 +15,4 @@ export default defineConfig({
     },
   },
 });
+

@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Navigate, createBrowserRouter } from "react-router-dom";
+import { Navigate, createHashRouter } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
@@ -26,7 +26,7 @@ function Fallback() {
   );
 }
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   { path: "/login", element: <LoginPage /> },
   {
     element: <ProtectedRoute />,
