@@ -1,0 +1,1 @@
+var e=[`uber-eats`,`lieferando`,`wolt`,`website`,`ai-telephone`],t={"uber-eats":`uberEats`,lieferando:`lieferando`,wolt:`wolt`,website:`website`,"ai-telephone":`aiTelephone`},n={"uber-eats":`primary`,lieferando:`success`,wolt:`info`,website:`warning`,"ai-telephone":`danger`};function r(e){return`orders.sources.${t[e]}`}export{e as n,r,n as t};

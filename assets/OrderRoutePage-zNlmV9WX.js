@@ -1,1 +1,0 @@
-import{t as e}from"./jsx-runtime-B-hcVAMW.js";import{I as t,R as n}from"./index-ma9V1vqP.js";var r=e();function i(){let{orderId:e}=n();return(0,r.jsx)(t,{to:`/orders?orderId=${e??``}`,replace:!0})}export{i as OrderRoutePage};
