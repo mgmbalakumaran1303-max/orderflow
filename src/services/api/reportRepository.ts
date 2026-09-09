@@ -1,5 +1,6 @@
 import { db } from "@/data/db";
 import { sleep } from "@/utils/format";
+import { ORDER_CHANNELS } from "@/constants/channels";
 import type { Order, OrderSource } from "@/types";
 
 export interface ReportSummary {
@@ -38,8 +39,7 @@ export const reportRepository = {
         cancelled: dayOrders.filter((order) => order.status === "cancelled").length,
       };
     });
-    const sources: OrderSource[] = ["uber-eats", "wolt", "whatsapp", "website", "other"];
-    const bySource = sources.map((source) => {
+    const bySource = ORDER_CHANNELS.map((source) => {
       const count = orders.filter((order) => order.source === source).length;
       return { source, count, percent: totalOrders ? Math.round((count / totalOrders) * 100) : 0 };
     });

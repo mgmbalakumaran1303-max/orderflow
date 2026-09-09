@@ -12,7 +12,8 @@ import { FormField, Select } from "@/components/ui/FormField";
 import { reportRepository, type ReportSummary } from "@/services/api/reportRepository";
 import { useRestaurantStore } from "@/stores/restaurantStore";
 import { useUiStore } from "@/stores/uiStore";
-import { formatEuro, sleep, sourceLabel } from "@/utils/format";
+import { formatEuro, sleep } from "@/utils/format";
+import { sourceLabelKey } from "@/constants/channels";
 import { BarChart3, Download } from "lucide-react";
 import type { ExportFormat } from "@/types";
 import { subDays } from "date-fns";
@@ -98,7 +99,7 @@ export function ReportsPage() {
               <h2 className="mb-3 text-sm font-semibold">Orders by Source</h2>
               <div className="h-56">
                 <ResponsiveContainer>
-                  <BarChart data={data.bySource.map((row) => ({ ...row, name: sourceLabel(row.source) }))}>
+                  <BarChart data={data.bySource.map((row) => ({ ...row, name: t(sourceLabelKey(row.source)) }))}>
                     <CartesianGrid stroke="var(--border)" />
                     <XAxis dataKey="name" stroke="var(--muted)" fontSize={12} />
                     <YAxis stroke="var(--muted)" fontSize={12} allowDecimals={false} />

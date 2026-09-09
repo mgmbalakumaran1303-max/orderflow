@@ -5,6 +5,7 @@ export const STORAGE_KEYS = {
   theme: "orderflow_theme",
   language: "orderflow_language",
   filters: "orderflow.orderFilters",
+  sidebarCollapsed: "orderflow.sidebarCollapsed",
 } as const;
 
 export function readJson<T>(key: string, fallback: T): T {

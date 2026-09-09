@@ -1,12 +1,23 @@
 export type OrderStatus = "new" | "preparing" | "ready" | "completed" | "cancelled";
-export type OrderSource = "uber-eats" | "whatsapp" | "website" | "wolt" | "other";
+export type OrderSource = "uber-eats" | "lieferando" | "wolt" | "website" | "ai-telephone";
 export type UserRole = "admin" | "manager" | "staff" | "viewer";
 export type UserStatus = "active" | "inactive";
 export type DeviceStatus = "connected" | "disconnected";
-export type ChannelId = "uber-eats" | "whatsapp" | "website" | "wolt";
+export type ChannelId = "uber-eats" | "lieferando" | "wolt" | "website" | "ai-telephone";
 export type ThemeMode = "dark" | "light";
 export type AppLanguage = "en" | "de" | "es" | "fr" | "it";
 export type ExportFormat = "csv" | "excel" | "pdf";
+export type FulfilmentType = "pickup" | "delivery";
+export type PaymentStatus = "paid" | "pending" | "failed" | "refunded" | "not-required";
+export type PrintStatus = "idle" | "printing" | "printed" | "failed";
+export type OrderIssueCode =
+  | "printer-error"
+  | "channel-disconnected"
+  | "ai-unclear"
+  | "missing-address"
+  | "missing-customer-info"
+  | "payment-issue";
+export type WaitingSeverity = "normal" | "warning" | "critical";
 
 export interface Restaurant {
   id: string;
@@ -42,6 +53,19 @@ export interface TimelineEvent {
   at: string | null;
 }
 
+export interface DeliveryAddress {
+  line1: string;
+  city: string;
+  zone?: string;
+  etaMinutes?: number;
+}
+
+export interface AiReview {
+  required: boolean;
+  reviewed: boolean;
+  confidence: number;
+}
+
 export interface Order {
   id: string;
   number: number;
@@ -54,6 +78,13 @@ export interface Order {
   createdAt: string;
   timeline: TimelineEvent[];
   rejectReason?: string;
+  fulfilment: FulfilmentType;
+  deliveryAddress?: DeliveryAddress;
+  paymentStatus: PaymentStatus;
+  printStatus: PrintStatus;
+  notes?: string;
+  aiReview?: AiReview;
+  issues: OrderIssueCode[];
 }
 
 export interface MenuCategory {

@@ -11,7 +11,7 @@ import { FormField, Select, TextInput } from "@/components/ui/FormField";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import { userRepository } from "@/services/api/userRepository";
 import { useUiStore } from "@/stores/uiStore";
-import { formatRelative, roleLabel } from "@/utils/format";
+import { formatRelative } from "@/utils/format";
 import type { StaffUser, UserRole, UserStatus } from "@/types";
 
 const empty = { name: "", email: "", role: "staff" as UserRole, status: "active" as UserStatus };
@@ -65,7 +65,7 @@ export function UsersPage() {
             <table className="w-full text-sm">
               <thead className="text-left text-xs text-muted">
                 <tr className="border-b border-border">
-                  {["Name", "Email", "Role", "Status", "Last Active", "Actions"].map((h) => (
+                  {[t("users.fields.name"), t("users.fields.email"), t("users.fields.role"), t("orders.status"), t("users.fields.lastActive"), t("orders.actions")].map((h) => (
                     <th key={h} className="px-4 py-3 font-medium">{h}</th>
                   ))}
                 </tr>
@@ -75,7 +75,7 @@ export function UsersPage() {
                   <tr key={user.id} className="border-b border-border/70">
                     <td className="px-4 py-3 font-medium">{user.name}</td>
                     <td className="px-4 py-3 text-muted">{user.email}</td>
-                    <td className="px-4 py-3">{roleLabel(user.role)}</td>
+                    <td className="px-4 py-3">{t(`users.roles.${user.role}`)}</td>
                     <td className="px-4 py-3">
                       <Badge tone={user.status === "active" ? "success" : "neutral"}>{user.status}</Badge>
                     </td>

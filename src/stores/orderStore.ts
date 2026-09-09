@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { orderRepository, type OrderFilters } from "@/services/api/orderRepository";
-import type { Order, OrderStatus } from "@/types";
+import type { Order, OrderStatus, PrintStatus } from "@/types";
 
 interface OrderState {
   orders: Order[];
@@ -10,6 +10,9 @@ interface OrderState {
   load: (restaurantId: string) => Promise<void>;
   getByNumber: (number: number) => Order | undefined;
   transition: (number: number, status: OrderStatus, rejectReason?: string) => Promise<Order>;
+  setPrintStatus: (number: number, printStatus: PrintStatus) => Promise<Order>;
+  confirmAiReview: (number: number, correctedItems: Order["items"]) => Promise<Order>;
+  addOrder: (order: Order) => void;
   counts: (restaurantId: string) => Record<OrderStatus | "all", number>;
   kpis: (restaurantId: string) => { new: number; preparing: number; ready: number; completed: number };
   setSelected: (number: number | null) => void;
@@ -38,6 +41,20 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     });
     return updated;
   },
+  setPrintStatus: async (number, printStatus) => {
+    const updated = await orderRepository.setPrintStatus(number, printStatus);
+    set({ orders: get().orders.map((order) => (order.number === number ? updated : order)) });
+    return updated;
+  },
+  confirmAiReview: async (number, correctedItems) => {
+    const updated = await orderRepository.confirmAiReview(number, correctedItems);
+    set({ orders: get().orders.map((order) => (order.number === number ? updated : order)) });
+    return updated;
+  },
+  addOrder: (order) => {
+    if (get().orders.some((existing) => existing.number === order.number)) return;
+    set({ orders: [order, ...get().orders] });
+  },
   counts: (restaurantId) => {
     const list = get().orders.filter((order) => order.restaurantId === restaurantId);
     return {
@@ -64,6 +81,13 @@ export const useOrderStore = create<OrderState>((set, get) => ({
       if (filters.restaurantId && order.restaurantId !== filters.restaurantId) return false;
       if (filters.status && filters.status !== "all" && order.status !== filters.status) return false;
       if (filters.source && filters.source !== "all" && order.source !== filters.source) return false;
+      if (filters.fulfilment && filters.fulfilment !== "all" && order.fulfilment !== filters.fulfilment) return false;
+      if (filters.issuesOnly && order.issues.length === 0) return false;
+      if (filters.today) {
+        const d = new Date(order.createdAt);
+        const now = new Date();
+        if (d.getFullYear() !== now.getFullYear() || d.getMonth() !== now.getMonth() || d.getDate() !== now.getDate()) return false;
+      }
       if (filters.customer && !order.customer.name.toLowerCase().includes(filters.customer.toLowerCase())) return false;
       if (typeof filters.minAmount === "number" && order.total < filters.minAmount) return false;
       if (typeof filters.maxAmount === "number" && order.total > filters.maxAmount) return false;

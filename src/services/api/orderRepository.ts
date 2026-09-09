@@ -1,24 +1,36 @@
 import { db } from "@/data/db";
 import { sleep } from "@/utils/format";
 import { assertTransition } from "@/utils/orderMachine";
-import type { Order, OrderSource, OrderStatus } from "@/types";
+import type { FulfilmentType, Order, OrderSource, OrderStatus, PrintStatus } from "@/types";
 
 export interface OrderFilters {
   restaurantId?: string;
   status?: OrderStatus | "all";
   source?: OrderSource | "all";
+  fulfilment?: FulfilmentType | "all";
   query?: string;
   from?: string;
   to?: string;
   minAmount?: number;
   maxAmount?: number;
   customer?: string;
+  issuesOnly?: boolean;
+  today?: boolean;
+}
+
+function isToday(iso: string): boolean {
+  const d = new Date(iso);
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
 }
 
 function matches(order: Order, filters: OrderFilters): boolean {
   if (filters.restaurantId && order.restaurantId !== filters.restaurantId) return false;
   if (filters.status && filters.status !== "all" && order.status !== filters.status) return false;
   if (filters.source && filters.source !== "all" && order.source !== filters.source) return false;
+  if (filters.fulfilment && filters.fulfilment !== "all" && order.fulfilment !== filters.fulfilment) return false;
+  if (filters.issuesOnly && order.issues.length === 0) return false;
+  if (filters.today && !isToday(order.createdAt)) return false;
   if (filters.customer && !order.customer.name.toLowerCase().includes(filters.customer.toLowerCase())) {
     return false;
   }
@@ -82,5 +94,34 @@ export const orderRepository = {
     order.rejectReason = rejectReason;
     order.timeline = stampTimeline(order, status);
     return structuredClone(order);
+  },
+
+  async setPrintStatus(number: number, printStatus: PrintStatus): Promise<Order> {
+    await sleep(150);
+    const order = db.orders.find((item) => item.number === number);
+    if (!order) throw new Error("Order not found");
+    order.printStatus = printStatus;
+    order.issues = printStatus === "failed" ? Array.from(new Set([...order.issues, "printer-error"])) : order.issues.filter((code) => code !== "printer-error");
+    return structuredClone(order);
+  },
+
+  async confirmAiReview(number: number, correctedItems: Order["items"]): Promise<Order> {
+    await sleep(200);
+    const order = db.orders.find((item) => item.number === number);
+    if (!order) throw new Error("Order not found");
+    order.items = correctedItems;
+    order.total = correctedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    if (order.aiReview) order.aiReview = { ...order.aiReview, required: false, reviewed: true };
+    order.issues = order.issues.filter((code) => code !== "ai-unclear");
+    return structuredClone(order);
+  },
+
+  /** Pushes a new order into the mock backend — the seam a real WebSocket/SSE push would replace. */
+  pushIncoming(order: Order): void {
+    db.orders.unshift(order);
+  },
+
+  nextOrderNumber(): number {
+    return db.orders.reduce((max, order) => Math.max(max, order.number), 1024) + 1;
   },
 };

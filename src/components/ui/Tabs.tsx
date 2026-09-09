@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/utils/format";
 
 export function Tabs<T extends string>({
@@ -62,6 +63,7 @@ export function ErrorState({
   onRetry?: () => void;
   onBack?: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center">
       <h3 className="text-base font-semibold">{title}</h3>
@@ -69,12 +71,12 @@ export function ErrorState({
       <div className="flex gap-2">
         {onBack ? (
           <button type="button" className="rounded-lg border border-border px-3 py-2 text-sm" onClick={onBack}>
-            Go Back
+            {t("common.goBack")}
           </button>
         ) : null}
         {onRetry ? (
           <button type="button" className="rounded-lg bg-primary px-3 py-2 text-sm text-white" onClick={onRetry}>
-            Retry
+            {t("common.retry")}
           </button>
         ) : null}
       </div>

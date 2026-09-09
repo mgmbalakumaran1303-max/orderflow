@@ -22,14 +22,20 @@
     "discard": "Discard changes",
     "today": "Today",
     "all": "All",
-    "clearAll": "Clear all"
+    "clearAll": "Clear all",
+    "dismiss": "Dismiss",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar"
   },
   "navigation": {
     "dashboard": "Dashboard",
     "orders": "Orders",
+    "new": "New Orders",
     "preparing": "Preparing",
     "ready": "Ready",
-    "menu": "Menu Management",
+    "completed": "Completed",
+    "allOrders": "All Orders",
+    "menu": "Menu",
     "restaurant": "Restaurant",
     "deliveryZones": "Delivery Zones",
     "capacity": "Capacity",
@@ -37,11 +43,15 @@
     "users": "Users & Roles",
     "devices": "Devices",
     "reports": "Reports",
+    "analytics": "Analytics",
     "notifications": "Notifications",
     "settings": "Settings",
     "personalization": "Personalization",
     "logout": "Logout",
-    "subtitle": "Restaurant Admin Portal"
+    "subtitle": "Restaurant Admin Portal",
+    "groupOrders": "Orders",
+    "groupOperations": "Operations",
+    "groupAdministration": "Administration"
   },
   "auth": {
     "email": "Email",
@@ -66,23 +76,34 @@
     "title": "Dashboard",
     "welcome": "Welcome back, Restaurant Admin",
     "totalOrders": "Total Orders",
-    "newOrders": "New Orders",
+    "newOrders": "New",
     "preparing": "Preparing",
     "ready": "Ready",
+    "issues": "Issues",
+    "ordersToday": "Orders Today",
+    "revenueToday": "Revenue Today",
     "completed": "Completed",
     "revenue": "Revenue",
     "vsYesterday": "vs yesterday",
     "ordersOverview": "Orders Overview",
-    "ordersBySource": "Orders by Source",
+    "ordersBySource": "Orders by Channel",
+    "liveOrders": "Live Orders",
     "recentOrders": "Recent Orders",
     "viewAll": "View all orders",
-    "unableToLoad": "Unable to load dashboard"
+    "unableToLoad": "Unable to load dashboard",
+    "rangeToday": "Today",
+    "range7Days": "7 Days",
+    "range30Days": "30 Days",
+    "seriesNew": "New",
+    "seriesPreparing": "Preparing",
+    "seriesCompleted": "Completed",
+    "noChartData": "No orders in this period."
   },
   "orders": {
     "title": "Orders",
     "search": "Search orders...",
     "noOrders": "No orders found.",
-    "noResults": "No results found",
+    "noResults": "No orders match your filters.",
     "emptyHint": "Try adjusting search or filters to see incoming tickets.",
     "unableToLoad": "Unable to load orders.",
     "loadError": "Something went wrong while loading the data.",
@@ -108,8 +129,21 @@
     "markReady": "Mark as Ready",
     "complete": "Complete Order",
     "print": "Print Order",
+    "reprint": "Reprint",
+    "retryPrint": "Retry Print",
     "received": "Received {{time}}",
     "deliveryAddress": "Delivery Address",
+    "pickup": "Pickup",
+    "delivery": "Delivery",
+    "fulfilment": "Fulfilment",
+    "deliveryZone": "Zone",
+    "eta": "ETA",
+    "noAddress": "No delivery address on file.",
+    "paymentStatus": "Payment",
+    "printerStatus": "Printer",
+    "notes": "Notes",
+    "issuesLabel": "Issues",
+    "waitingTime": "Waiting",
     "timeline": "Timeline",
     "accepted": "Order #{{number}} accepted successfully.",
     "rejected": "Order #{{number}} rejected",
@@ -117,9 +151,53 @@
     "completedToast": "Order #{{number}} completed.",
     "updateError": "Unable to update order.",
     "printed": "Order printed successfully.",
+    "reprinted": "Order reprinted successfully.",
     "printerUnavailable": "Printer unavailable.",
     "calling": "Calling {{phone}}...",
-    "openingNav": "Opening navigation..."
+    "openingNav": "Opening navigation...",
+    "newOrderToast": "New order #{{number}} received.",
+    "aiReviewBadge": "AI Order Requires Review",
+    "aiReviewHint": "Check items, quantities and address before accepting.",
+    "review": "Review",
+    "editOrder": "Edit Order",
+    "confirmOrder": "Confirm Order",
+    "aiReviewed": "Order #{{number}} confirmed after review.",
+    "clearFilters": "Clear filters",
+    "activeFilters": "{{count}} active",
+    "issuesOnly": "Issues only",
+    "todayOnly": "Today",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items",
+    "waitingMinutes_one": "{{count}} min",
+    "waitingMinutes_other": "{{count}} min",
+    "sources": {
+      "uberEats": "Uber Eats",
+      "lieferando": "Lieferando",
+      "wolt": "Wolt",
+      "website": "Website",
+      "aiTelephone": "AI Telephone"
+    },
+    "paymentStatuses": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "failed": "Failed",
+      "refunded": "Refunded",
+      "not-required": "Not Required"
+    },
+    "printStatuses": {
+      "idle": "Not Printed",
+      "printing": "Printing",
+      "printed": "Printed",
+      "failed": "Print Failed"
+    },
+    "issueCodes": {
+      "printer-error": "Printer error",
+      "channel-disconnected": "Channel disconnected",
+      "ai-unclear": "AI order needs review",
+      "missing-address": "Missing address",
+      "missing-customer-info": "Missing customer info",
+      "payment-issue": "Payment issue"
+    }
   },
   "dialogs": {
     "acceptTitle": "Accept Order?",
@@ -134,6 +212,10 @@
     "completeBody": "Are you sure you want to complete this order?",
     "printTitle": "Print Order?",
     "printBody": "A receipt will be sent to the configured printer.",
+    "reprintTitle": "Reprint Order?",
+    "reprintBody": "A new receipt copy will be sent to the configured printer.",
+    "aiConfirmTitle": "Confirm corrected order?",
+    "aiConfirmBody": "The order will be marked as reviewed and become available for preparation.",
     "logoutTitle": "Logout",
     "logoutBody": "Are you sure you want to logout?",
     "unsavedTitle": "Unsaved Changes",
@@ -149,7 +231,7 @@
     "saveChanges": "Save Changes",
     "deleteItem": "Delete Item",
     "updated": "Menu updated successfully",
-    "noItems": "No menu items available."
+    "noItems": "No menu items configured."
   },
   "deliveryZones": {
     "title": "Delivery Zones",
@@ -167,7 +249,20 @@
   "users": {
     "title": "Users & Roles",
     "add": "Add User",
-    "noUsers": "No users available."
+    "noUsers": "No users available.",
+    "roles": {
+      "admin": "Restaurant Admin",
+      "manager": "Manager",
+      "staff": "Staff",
+      "viewer": "Viewer"
+    },
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "lastActive": "Last Active"
+    }
   },
   "devices": {
     "title": "Devices",
@@ -179,7 +274,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "empty": "No notifications",
+    "empty": "You're all caught up.",
     "markRead": "Mark as read",
     "unread": "Unread",
     "read": "Read",
@@ -223,6 +318,14 @@
     "help": "Help Center",
     "noSearch": "No search results",
     "switched": "Switched to {{name}}"
+  },
+  "connection": {
+    "offlineTitle": "You are offline",
+    "offlineBody": "Orders will continue to queue locally until the connection returns.",
+    "channelDisconnectedTitle": "{{name}} connection unavailable",
+    "channelDisconnectedBody": "New orders from this channel may be delayed until it reconnects.",
+    "deviceDisconnectedTitle": "{{name}} disconnected",
+    "deviceDisconnectedBody": "Orders will continue to queue locally. Check the device connection."
   },
   "errors": {
     "notFoundTitle": "Page not found.",

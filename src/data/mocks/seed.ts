@@ -3,11 +3,13 @@ import type {
   CapacityState,
   Channel,
   Customer,
+  DeliveryAddress,
   DeliveryZone,
   Device,
   MenuCategory,
   MenuItem,
   Order,
+  OrderIssueCode,
   OrderItem,
   OrderSource,
   OrderStatus,
@@ -64,6 +66,15 @@ export const customers: Customer[] = [
   { id: "c6", name: "Emma Braun", phone: "+49 174 333 2211", email: "emma@example.com" },
   { id: "c7", name: "Omar Haddad", phone: "+49 157 888 9900", email: "omar@example.com" },
   { id: "c8", name: "Mia Hoffmann", phone: "+49 162 101 2020", email: "mia@example.com" },
+];
+
+const deliveryAddresses: DeliveryAddress[] = [
+  { line1: "Torstraße 55", city: "10119 Berlin", zone: "Mitte", etaMinutes: 22 },
+  { line1: "Kastanienallee 12", city: "10435 Berlin", zone: "Prenzlauer Berg", etaMinutes: 18 },
+  { line1: "Warschauer Str. 41", city: "10243 Berlin", zone: "Friedrichshain", etaMinutes: 27 },
+  { line1: "Bergmannstraße 3", city: "10961 Berlin", zone: "Kreuzberg", etaMinutes: 20 },
+  { line1: "Karl-Marx-Allee 90", city: "10243 Berlin", zone: "Friedrichshain", etaMinutes: 25 },
+  { line1: "Schönhauser Allee 130", city: "10437 Berlin", zone: "Prenzlauer Berg", etaMinutes: 16 },
 ];
 
 export const menuCategories: MenuCategory[] = [
@@ -200,7 +211,7 @@ export const menuItems: MenuItem[] = [
   },
 ];
 
-const sources: OrderSource[] = ["uber-eats", "wolt", "whatsapp", "website", "other"];
+const sources: OrderSource[] = ["uber-eats", "wolt", "lieferando", "website", "ai-telephone"];
 const catalog: Array<{ name: string; price: number; notes?: string }> = [
   { name: "Margherita Pizza", price: 12, notes: "Extra Cheese" },
   { name: "Pepperoni Pizza", price: 14.5 },
@@ -211,13 +222,14 @@ const catalog: Array<{ name: string; price: number; notes?: string }> = [
   { name: "Caesar Salad", price: 9.5 },
   { name: "BBQ Chicken Pizza", price: 15 },
 ];
+const orderNotes = ["No onions please", "Ring the bell twice", "Leave at the door", "Extra napkins", undefined, undefined];
 
-function minutesAgo(mins: number): string {
+export function minutesAgo(mins: number): string {
   return new Date(Date.now() - mins * 60_000).toISOString();
 }
 
 function buildTimeline(status: OrderStatus, createdAt: string): TimelineEvent[] {
-  const accepted = status !== "new" && status !== "cancelled" ? createdAt : status === "cancelled" ? createdAt : null;
+  const accepted = status !== "new" ? createdAt : null;
   const preparing = ["preparing", "ready", "completed"].includes(status) ? createdAt : null;
   const ready = ["ready", "completed"].includes(status) ? createdAt : null;
   const completed = status === "completed" ? createdAt : null;
@@ -262,26 +274,62 @@ const statusCycle: OrderStatus[] = [
   "completed",
 ];
 
+/** Builds a single mock order. Shared by the seed data and the realtime order simulator. */
+export function createMockOrder(seed: number, restaurantId: string, number: number, status: OrderStatus = "new"): Order {
+  const createdAt = minutesAgo(status === "new" ? seed % 4 : 2 + seed * 7);
+  const items = makeItems(seed + 3);
+  const customer = customers[seed % customers.length];
+  const source = sources[seed % sources.length];
+  const fulfilment = seed % 5 === 0 ? "pickup" : "delivery";
+  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const printFailed = seed % 13 === 0 && status !== "new";
+  const printStatus = printFailed ? "failed" : status === "new" ? "idle" : status === "preparing" ? "printed" : status === "ready" || status === "completed" ? "printed" : "idle";
+
+  const paymentStatus =
+    seed % 19 === 0 ? "failed" : seed % 11 === 0 ? "pending" : status === "cancelled" && seed % 3 === 0 ? "refunded" : source === "website" ? "paid" : "paid";
+
+  const aiUnreviewed = source === "ai-telephone" && seed % 3 !== 0 && status === "new";
+  const aiReview =
+    source === "ai-telephone"
+      ? { required: aiUnreviewed, reviewed: !aiUnreviewed, confidence: 55 + (seed % 40) }
+      : undefined;
+
+  const missingAddress = fulfilment === "delivery" && seed % 17 === 0;
+
+  const issues: OrderIssueCode[] = [];
+  if (printFailed) issues.push("printer-error");
+  if (aiReview?.required) issues.push("ai-unclear");
+  if (missingAddress) issues.push("missing-address");
+  if (paymentStatus === "failed") issues.push("payment-issue");
+
+  return {
+    id: `ord-${number}`,
+    number,
+    restaurantId,
+    source,
+    customer,
+    items,
+    total,
+    status,
+    createdAt,
+    timeline: buildTimeline(status, createdAt),
+    fulfilment,
+    deliveryAddress: fulfilment === "delivery" && !missingAddress ? deliveryAddresses[seed % deliveryAddresses.length] : undefined,
+    paymentStatus,
+    printStatus,
+    notes: orderNotes[seed % orderNotes.length],
+    aiReview,
+    issues,
+  };
+}
+
 function buildOrders(): Order[] {
   const orders: Order[] = [];
   for (let i = 0; i < 36; i += 1) {
     const restaurantId = i % 9 === 0 ? "rest-2" : i % 11 === 0 ? "rest-3" : "rest-1";
     const status = statusCycle[i % statusCycle.length];
-    const createdAt = minutesAgo(2 + i * 7);
-    const items = makeItems(i + 3);
-    const customer = customers[i % customers.length];
-    orders.push({
-      id: `ord-${1024 + i}`,
-      number: 1024 + i,
-      restaurantId,
-      source: sources[i % sources.length],
-      customer,
-      items,
-      total: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
-      status,
-      createdAt,
-      timeline: buildTimeline(status, createdAt),
-    });
+    orders.push(createMockOrder(i, restaurantId, 1024 + i, status));
   }
   return orders;
 }
@@ -312,9 +360,10 @@ export const devices: Device[] = [
 
 export const channels: Channel[] = [
   { id: "uber-eats", name: "Uber Eats", connected: true, enabled: true, lastSync: minutesAgo(3), autoAccept: false, autoPrint: true, apiStatus: "healthy" },
-  { id: "whatsapp", name: "WhatsApp", connected: true, enabled: true, lastSync: minutesAgo(8), autoAccept: true, autoPrint: false, apiStatus: "healthy" },
+  { id: "lieferando", name: "Lieferando", connected: true, enabled: true, lastSync: minutesAgo(8), autoAccept: true, autoPrint: false, apiStatus: "healthy" },
   { id: "website", name: "Website", connected: true, enabled: true, lastSync: minutesAgo(1), autoAccept: false, autoPrint: true, apiStatus: "healthy" },
-  { id: "wolt", name: "Wolt", connected: true, enabled: false, lastSync: minutesAgo(40), autoAccept: false, autoPrint: false, apiStatus: "degraded" },
+  { id: "wolt", name: "Wolt", connected: false, enabled: false, lastSync: minutesAgo(40), autoAccept: false, autoPrint: false, apiStatus: "offline" },
+  { id: "ai-telephone", name: "AI Telephone", connected: true, enabled: true, lastSync: minutesAgo(5), autoAccept: false, autoPrint: false, apiStatus: "degraded" },
 ];
 
 export const notifications: AppNotification[] = [

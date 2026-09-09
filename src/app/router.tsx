@@ -8,8 +8,10 @@ import { TableSkeleton } from "@/components/ui/Skeleton";
 
 const DashboardPage = lazy(() => import("@/features/dashboard/pages/DashboardPage").then((m) => ({ default: m.DashboardPage })));
 const OrdersPage = lazy(() => import("@/features/orders/pages/OrdersPage").then((m) => ({ default: m.OrdersPage })));
+const NewOrdersPage = lazy(() => import("@/features/orders/pages/OrdersPage").then((m) => ({ default: m.NewOrdersPage })));
 const PreparingOrdersPage = lazy(() => import("@/features/orders/pages/OrdersPage").then((m) => ({ default: m.PreparingOrdersPage })));
 const ReadyOrdersPage = lazy(() => import("@/features/orders/pages/OrdersPage").then((m) => ({ default: m.ReadyOrdersPage })));
+const CompletedOrdersPage = lazy(() => import("@/features/orders/pages/OrdersPage").then((m) => ({ default: m.CompletedOrdersPage })));
 const OrderRoutePage = lazy(() => import("@/features/orders/pages/OrderRoutePage").then((m) => ({ default: m.OrderRoutePage })));
 const MenuPage = lazy(() => import("@/features/menu/pages/MenuPage").then((m) => ({ default: m.MenuPage })));
 const RestaurantPage = lazy(() => import("@/features/restaurant/pages/RestaurantPage").then((m) => ({ default: m.RestaurantPage })));
@@ -46,8 +48,10 @@ export const router = createHashRouter([
           { path: "/dashboard", element: <Suspense fallback={<Fallback />}><DashboardPage /></Suspense> },
           { path: "/orders", element: <Suspense fallback={<Fallback />}><OrdersPage /></Suspense> },
           { path: "/orders/:orderId", element: <Suspense fallback={<Fallback />}><OrderRoutePage /></Suspense> },
+          { path: "/new", element: <Suspense fallback={<Fallback />}><NewOrdersPage /></Suspense> },
           { path: "/preparing", element: <Suspense fallback={<Fallback />}><PreparingOrdersPage /></Suspense> },
           { path: "/ready", element: <Suspense fallback={<Fallback />}><ReadyOrdersPage /></Suspense> },
+          { path: "/completed", element: <Suspense fallback={<Fallback />}><CompletedOrdersPage /></Suspense> },
           { path: "/menu", element: <Suspense fallback={<Fallback />}><MenuPage /></Suspense> },
           { path: "/restaurant", element: <Suspense fallback={<Fallback />}><RestaurantPage /></Suspense> },
           { path: "/delivery-zones", element: <Suspense fallback={<Fallback />}><DeliveryZonesPage /></Suspense> },
