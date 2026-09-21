@@ -22,16 +22,16 @@ export function FormField({
 const fieldClass =
   "h-10 w-full rounded-lg border border-border bg-surface-2 px-3 text-sm text-foreground outline-none focus:border-primary";
 
-export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={cn(fieldClass, props.className)} {...props} />;
+export function TextInput({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
+  return <input className={cn(fieldClass, className)} {...props} />;
 }
 
-export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea className={cn("min-h-24 w-full rounded-lg border border-border bg-surface-2 p-3 text-sm outline-none focus:border-primary", props.className)} {...props} />;
+export function TextArea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea className={cn("min-h-24 w-full rounded-lg border border-border bg-surface-2 p-3 text-sm outline-none focus:border-primary", className)} {...props} />;
 }
 
-export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select className={cn(fieldClass, props.className)} {...props} />;
+export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
+  return <select className={cn(fieldClass, className)} {...props} />;
 }
 
 export function Toggle({
